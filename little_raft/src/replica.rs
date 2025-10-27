@@ -355,7 +355,7 @@ where
     fn update_election_deadline(&mut self) {
         // Randomize each election deadline within the allowed range.
         self.next_election_deadline = Instant::now()
-            + rand::thread_rng().gen_range(self.election_timeout.0..=self.election_timeout.1);
+            + rand::rng().random_range(self.election_timeout.0..=self.election_timeout.1);
     }
 
     fn poll_as_candidate(&mut self, recv_msg: &Receiver<()>) {
