@@ -1,4 +1,4 @@
-use crossbeam::channel::{bounded, Receiver};
+use crossbeam::channel::{Receiver, bounded};
 use std::{thread, time::Duration};
 
 pub struct Timer {

@@ -1,6 +1,6 @@
 use bytes::Bytes;
 use crossbeam_channel as channel;
-use crossbeam_channel::{unbounded, Receiver, Sender};
+use crossbeam_channel::{Receiver, Sender, unbounded};
 use little_raft::{
     cluster::Cluster,
     message::Message,
@@ -43,7 +43,10 @@ struct Calculator {
 impl StateMachine<ArithmeticOperation, Bytes> for Calculator {
     fn apply_transition(&mut self, transition: ArithmeticOperation) {
         self.value += transition.delta;
-        println!("id {} my value is now {} after applying delta {}", self.id, self.value, transition.delta);
+        println!(
+            "id {} my value is now {} after applying delta {}",
+            self.id, self.value, transition.delta
+        );
     }
 
     fn register_transition_state(
@@ -238,16 +241,18 @@ fn run_clusters_communication(
 
         // For each cluster, start a thread where we notify the cluster replica
         // of a new message as soon as we receive one for it.
-        thread::spawn(move || loop {
-            let msg = cluster_message_rx.recv().unwrap();
-            match cluster.lock() {
-                Ok(mut unlocked_cluster) => {
-                    unlocked_cluster.pending_messages.push(msg);
-                    message_notifier
-                        .send(())
-                        .expect("could not notify of message");
+        thread::spawn(move || {
+            loop {
+                let msg = cluster_message_rx.recv().unwrap();
+                match cluster.lock() {
+                    Ok(mut unlocked_cluster) => {
+                        unlocked_cluster.pending_messages.push(msg);
+                        message_notifier
+                            .send(())
+                            .expect("could not notify of message");
+                    }
+                    _ => return,
                 }
-                _ => return,
             }
         });
     }
@@ -358,7 +363,13 @@ fn run_replicas() {
         3,
     );
 
-    run_arithmetic_operation_on_cluster(clusters.clone(), state_machines.clone(), transition_tx.clone(), 3, 4);
+    run_arithmetic_operation_on_cluster(
+        clusters.clone(),
+        state_machines.clone(),
+        transition_tx.clone(),
+        3,
+        4,
+    );
 
     halt_clusters(clusters);
 

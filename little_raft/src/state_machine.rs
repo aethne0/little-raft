@@ -49,7 +49,10 @@ pub trait StateMachineTransition: Clone + Debug {
 /// Replica start from a saved state or perform log compaction before the log
 /// sequence starts taking up too much memory.
 #[derive(Clone)]
-pub struct Snapshot<D> where D: Clone {
+pub struct Snapshot<D>
+where
+    D: Clone,
+{
     pub last_included_index: usize,
     pub last_included_term: usize,
     pub data: D,
